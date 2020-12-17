@@ -1,24 +1,20 @@
-#include "opencv2/opencv.hpp"
+#include <opencv2/highgui.hpp>
+#include <iostream>
 
-using namespace cv;
+int main(int argc, char **argv) {
 
-int main(int argc, char** argv)
-{
-    VideoCapture cap;
-    // open the default camera, use something different from 0 otherwise;
-    // Check VideoCapture documentation.
+    cv::Mat image;
+    image = cv::imread(argv[1], cv::IMREAD_COLOR);
 
-    if(!cap.open(0))
-        return 0;
-    for(;;)
-    {
-          Mat frame;
-          cap >> frame;
-          if( frame.empty() ) break; // end of video stream
-          imshow("this is you, smile! :)", frame);
-          if( waitKey(10) == 27 ) break; // stop capturing by pressing ESC 
+    if (!image.data) {
+        std::cout << "Could not open or find the image" << std::endl;
+        return -1;
     }
-    // the camera will be closed automatically upon exit
-    // cap.close();
+
+    cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
+    cv::imshow("Display window", image);
+
+    cv::waitKey(0);
     return 0;
+
 }

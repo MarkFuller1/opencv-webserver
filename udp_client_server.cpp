@@ -2,8 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 
-namespace udp_client_server
-{
+namespace udp_client_server {
 
 
 // ========================= CLIENT =========================
@@ -36,41 +35,38 @@ namespace udp_client_server
  * \param[in] addr  The address to convert to a numeric IP.
  * \param[in] port  The port number.
  */
-udp_client::udp_client(const std::string& addr, int port)
-    : f_port(port)
-    , f_addr(addr)
-{
-    char decimal_port[16];
-    snprintf(decimal_port, sizeof(decimal_port), "%d", f_port);
-    decimal_port[sizeof(decimal_port) / sizeof(decimal_port[0]) - 1] = '\0';
-    struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = IPPROTO_UDP;
-    int r(getaddrinfo(addr.c_str(), decimal_port, &hints, &f_addrinfo));
-    if(r != 0 || f_addrinfo == NULL)
-    {
-        throw udp_client_server_runtime_error(("invalid address or port: \"" + addr + ":" + decimal_port + "\"").c_str());
+    udp_client::udp_client(const std::string &addr, int port)
+            : f_port(port), f_addr(addr) {
+        char decimal_port[16];
+        snprintf(decimal_port, sizeof(decimal_port), "%d", f_port);
+        decimal_port[sizeof(decimal_port) / sizeof(decimal_port[0]) - 1] = '\0';
+        struct addrinfo hints;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_DGRAM;
+        hints.ai_protocol = IPPROTO_UDP;
+        int r(getaddrinfo(addr.c_str(), decimal_port, &hints, &f_addrinfo));
+        if (r != 0 || f_addrinfo == NULL) {
+            throw udp_client_server_runtime_error(
+                    ("invalid address or port: \"" + addr + ":" + decimal_port + "\"").c_str());
+        }
+        f_socket = socket(f_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
+        if (f_socket == -1) {
+            freeaddrinfo(f_addrinfo);
+            throw udp_client_server_runtime_error(
+                    ("could not create socket for: \"" + addr + ":" + decimal_port + "\"").c_str());
+        }
     }
-    f_socket = socket(f_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
-    if(f_socket == -1)
-    {
-        freeaddrinfo(f_addrinfo);
-        throw udp_client_server_runtime_error(("could not create socket for: \"" + addr + ":" + decimal_port + "\"").c_str());
-    }
-}
 
 /** \brief Clean up the UDP client object.
  *
  * This function frees the address information structure and close the socket
  * before returning.
  */
-udp_client::~udp_client()
-{
-    freeaddrinfo(f_addrinfo);
-    close(f_socket);
-}
+    udp_client::~udp_client() {
+        freeaddrinfo(f_addrinfo);
+        close(f_socket);
+    }
 
 /** \brief Retrieve a copy of the socket identifier.
  *
@@ -79,10 +75,9 @@ udp_client::~udp_client()
  *
  * \return The socket used by this UDP client.
  */
-int udp_client::get_socket() const
-{
-    return f_socket;
-}
+    int udp_client::get_socket() const {
+        return f_socket;
+    }
 
 /** \brief Retrieve the port used by this UDP client.
  *
@@ -91,10 +86,9 @@ int udp_client::get_socket() const
  *
  * \return The port as expected in a host integer.
  */
-int udp_client::get_port() const
-{
-    return f_port;
-}
+    int udp_client::get_port() const {
+        return f_port;
+    }
 
 /** \brief Retrieve a copy of the address.
  *
@@ -106,10 +100,9 @@ int udp_client::get_port() const
  *
  * \return A string with a copy of the constructor input address.
  */
-std::string udp_client::get_addr() const
-{
-    return f_addr;
-}
+    std::string udp_client::get_addr() const {
+        return f_addr;
+    }
 
 /** \brief Send a message through this UDP client.
  *
@@ -128,10 +121,9 @@ std::string udp_client::get_addr() const
  * \return -1 if an error occurs, otherwise the number of bytes sent. errno
  * is set accordingly on error.
  */
-int udp_client::send(const char *msg, size_t size)
-{
-    return sendto(f_socket, msg, size, 0, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
-}
+    int udp_client::send(const char *msg, size_t size) {
+        return sendto(f_socket, msg, size, 0, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
+    }
 
 
 
@@ -169,47 +161,44 @@ int udp_client::send(const char *msg, size_t size)
  * \param[in] addr  The address we receive on.
  * \param[in] port  The port we receive from.
  */
-udp_server::udp_server(const std::string& addr, int port)
-    : f_port(port)
-    , f_addr(addr)
-{
-    char decimal_port[16];
-    snprintf(decimal_port, sizeof(decimal_port), "%d", f_port);
-    decimal_port[sizeof(decimal_port) / sizeof(decimal_port[0]) - 1] = '\0';
-    struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_protocol = IPPROTO_UDP;
-    int r(getaddrinfo(addr.c_str(), decimal_port, &hints, &f_addrinfo));
-    if(r != 0 || f_addrinfo == NULL)
-    {
-        throw udp_client_server_runtime_error(("invalid address or port for UDP socket: \"" + addr + ":" + decimal_port + "\"").c_str());
+    udp_server::udp_server(const std::string &addr, int port)
+            : f_port(port), f_addr(addr) {
+        char decimal_port[16];
+        snprintf(decimal_port, sizeof(decimal_port), "%d", f_port);
+        decimal_port[sizeof(decimal_port) / sizeof(decimal_port[0]) - 1] = '\0';
+        struct addrinfo hints;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_DGRAM;
+        hints.ai_protocol = IPPROTO_UDP;
+        int r(getaddrinfo(addr.c_str(), decimal_port, &hints, &f_addrinfo));
+        if (r != 0 || f_addrinfo == NULL) {
+            throw udp_client_server_runtime_error(
+                    ("invalid address or port for UDP socket: \"" + addr + ":" + decimal_port + "\"").c_str());
+        }
+        f_socket = socket(f_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
+        if (f_socket == -1) {
+            freeaddrinfo(f_addrinfo);
+            throw udp_client_server_runtime_error(
+                    ("could not create UDP socket for: \"" + addr + ":" + decimal_port + "\"").c_str());
+        }
+        r = bind(f_socket, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
+        if (r != 0) {
+            freeaddrinfo(f_addrinfo);
+            close(f_socket);
+            throw udp_client_server_runtime_error(
+                    ("could not bind UDP socket with: \"" + addr + ":" + decimal_port + "\"").c_str());
+        }
     }
-    f_socket = socket(f_addrinfo->ai_family, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
-    if(f_socket == -1)
-    {
-        freeaddrinfo(f_addrinfo);
-        throw udp_client_server_runtime_error(("could not create UDP socket for: \"" + addr + ":" + decimal_port + "\"").c_str());
-    }
-    r = bind(f_socket, f_addrinfo->ai_addr, f_addrinfo->ai_addrlen);
-    if(r != 0)
-    {
-        freeaddrinfo(f_addrinfo);
-        close(f_socket);
-        throw udp_client_server_runtime_error(("could not bind UDP socket with: \"" + addr + ":" + decimal_port + "\"").c_str());
-    }
-}
 
 /** \brief Clean up the UDP server.
  *
  * This function frees the address info structures and close the socket.
  */
-udp_server::~udp_server()
-{
-    freeaddrinfo(f_addrinfo);
-    close(f_socket);
-}
+    udp_server::~udp_server() {
+        freeaddrinfo(f_addrinfo);
+        close(f_socket);
+    }
 
 /** \brief The socket used by this UDP server.
  *
@@ -218,10 +207,9 @@ udp_server::~udp_server()
  *
  * \return The socket of this UDP server.
  */
-int udp_server::get_socket() const
-{
-    return f_socket;
-}
+    int udp_server::get_socket() const {
+        return f_socket;
+    }
 
 /** \brief The port used by this UDP server.
  *
@@ -230,10 +218,9 @@ int udp_server::get_socket() const
  *
  * \return The port of the UDP server.
  */
-int udp_server::get_port() const
-{
-    return f_port;
-}
+    int udp_server::get_port() const {
+        return f_port;
+    }
 
 /** \brief Return the address of this UDP server.
  *
@@ -243,10 +230,9 @@ int udp_server::get_port() const
  *
  * \return The address as passed to the constructor.
  */
-std::string udp_server::get_addr() const
-{
-    return f_addr;
-}
+    std::string udp_server::get_addr() const {
+        return f_addr;
+    }
 
 /** \brief Wait on a message.
  *
@@ -266,10 +252,9 @@ std::string udp_server::get_addr() const
  *
  * \return The number of bytes read or -1 if an error occurs.
  */
-int udp_server::recv(char *msg, size_t max_size)
-{
-    return ::recv(f_socket, msg, max_size, 0);
-}
+    int udp_server::recv(char *msg, size_t max_size) {
+        return ::recv(f_socket, msg, max_size, 0);
+    }
 
 /** \brief Wait for data to come in.
  *
@@ -290,30 +275,27 @@ int udp_server::recv(char *msg, size_t max_size)
  *
  * \return -1 if an error occurs or the function timed out, the number of bytes received otherwise.
  */
-int udp_server::timed_recv(char *msg, size_t max_size, int max_wait_ms)
-{
-    fd_set s;
-    FD_ZERO(&s);
-    FD_SET(f_socket, &s);
-    struct timeval timeout;
-    timeout.tv_sec = max_wait_ms / 1000;
-    timeout.tv_usec = (max_wait_ms % 1000) * 1000;
-    int retval = select(f_socket + 1, &s, &s, &s, &timeout);
-    if(retval == -1)
-    {
-        // select() set errno accordingly
+    int udp_server::timed_recv(char *msg, size_t max_size, int max_wait_ms) {
+        fd_set s;
+        FD_ZERO(&s);
+        FD_SET(f_socket, &s);
+        struct timeval timeout;
+        timeout.tv_sec = max_wait_ms / 1000;
+        timeout.tv_usec = (max_wait_ms % 1000) * 1000;
+        int retval = select(f_socket + 1, &s, &s, &s, &timeout);
+        if (retval == -1) {
+            // select() set errno accordingly
+            return -1;
+        }
+        if (retval > 0) {
+            // our socket has data
+            return ::recv(f_socket, msg, max_size, 0);
+        }
+
+        // our socket has no data
+        errno = EAGAIN;
         return -1;
     }
-    if(retval > 0)
-    {
-        // our socket has data
-        return ::recv(f_socket, msg, max_size, 0);
-    }
-
-    // our socket has no data
-    errno = EAGAIN;
-    return -1;
-}
 
 } // namespace udp_client_server
 
